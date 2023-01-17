@@ -7,11 +7,11 @@ import json
 import multiprocessing
 
 human_dataset = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "datasets", "laion-art.parquet")
-human_skip = 0
+human_skip = 4846
 ai_dataset = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "datasets", "openprompts.csv")
-ai_skip = 0
+ai_skip = 2653
 output = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "datasets", "digital-art")
-workers = 16
+workers = 10
 
 def download_image(index, url, is_ai=False):
     response = requests.get(url)
