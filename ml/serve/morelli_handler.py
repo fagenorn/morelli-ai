@@ -5,16 +5,15 @@ import json
 import logging
 import os
 from abc import ABC
-from PIL import Image
+
+import numpy as np
 import torch
 import transformers
+from PIL import Image
+from torchvision.transforms import (CenterCrop, Compose, Normalize, Resize,
+                                    ToTensor)
 # from captum.attr import LayerIntegratedGradients
-from transformers import (
-    AutoModelForImageClassification,
-    AutoFeatureExtractor,
-)
-from torchvision.transforms import (CenterCrop, Compose, Normalize,
-                                    Resize, ToTensor)
+from transformers import AutoFeatureExtractor, AutoModelForImageClassification
 from ts.torch_handler.base_handler import BaseHandler
 
 logger = logging.getLogger(__name__)
@@ -172,7 +171,16 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
         Returns:
             (list): Returns a list of the Predictions and Explanations.
         """
-        return (inference_output.logits, inference_output.attentions)
+        logits = inference_output.logits
+        attentions = inference_output.attentions
+
+        predicted_label = logits.argmax(-1).item()
+        probs = torch.softmax(logits, dim=1)
+
+        return {
+            "label": self.model.config.id2label[predicted_label],
+            "ai_chance": round(probs[0][0].item(), 4),	
+        }
 
     def get_insights(self, input_batch, text, target):
         """This function initialize and calls the layer integrated gradient to get word importance
@@ -333,3 +341,39 @@ def get_word_token(input_ids, tokenizer):
     # Remove unicode space character from BPE Tokeniser
     tokens = [token.replace("Ġ", "") for token in tokens]
     return tokens
+
+def rollout(attentions, discard_ratio, head_fusion):
+    result = torch.eye(attentions[0].size(-1))
+    with torch.no_grad():
+        for attention in attentions:
+            if head_fusion == "mean":
+                attention_heads_fused = attention.mean(axis=1)
+            elif head_fusion == "max":
+                attention_heads_fused = attention.max(axis=1)[0]
+            elif head_fusion == "min":
+                attention_heads_fused = attention.min(axis=1)[0]
+            else:
+                raise "Attention head fusion type Not supported"
+
+            # Drop the lowest attentions, but
+            # don't drop the class token
+            flat = attention_heads_fused.view(attention_heads_fused.size(0), -1)
+            _, indices = flat.topk(int(flat.size(-1)*discard_ratio), -1, False)
+            indices = indices[indices != 0]
+            flat[0, indices] = 0
+
+            I = torch.eye(attention_heads_fused.size(-1))
+            a = (attention_heads_fused + 1.0*I)/2
+            a = a / a.sum(dim=-1)
+
+            result = torch.matmul(a, result)
+    
+    # Look at the total attention between the class token,
+    # and the image patches
+    mask = result[0, 0 , 1 :]
+    # In case of 224x224 image, this brings us from 196 to 14
+    width = int(mask.size(-1)**0.5)
+    mask = mask.reshape(width, width).numpy()
+    mask = mask / np.max(mask)
+
+    return mask   
