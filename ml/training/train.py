@@ -98,7 +98,7 @@ def train(train_dataset, test_dataset):
         do_eval=True, 
         overwrite_output_dir=False, 
         log_level="warning",
-        num_train_epochs=12, 
+        num_train_epochs=20, 
         per_device_train_batch_size=16,
         per_device_eval_batch_size=16,
         load_best_model_at_end = True,
