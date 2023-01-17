@@ -147,10 +147,9 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
                 # if the image is a list
                 image = torch.FloatTensor(image)
 
-            inputs = self.feature_extractor(images=image, return_tensors="pt")
-            images.append(inputs)
+            images.append(images)
 
-        return torch.stack(images).to(self.device)
+        return self.feature_extractor(images=images, return_tensors="pt")
 
     def inference(self, data):
         """Predict the class (or classes) of the received text using the
@@ -162,8 +161,7 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
         """
 
         with torch.no_grad():
-            marshalled_data = data.to(self.device)
-            results = self.model(**marshalled_data)
+            results = self.model(**data)
 
         return results
 
