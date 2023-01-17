@@ -6,11 +6,11 @@ authors = ["Anis <anisanissakkaf@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = ">=3.10.7,<3.11"
+python = ">=3.10.6,<3.11"
 django = "^4.1.5"
 transformers = "^4.25.1"
-datasets = {extras = ["vision"], version = "^2.8.0"}
-evaluate = {extras = ["sklearn"], version = "^0.4.0"}
+datasets = { extras = ["vision"], version = "^2.8.0" }
+evaluate = { extras = ["sklearn"], version = "^0.4.0" }
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.12.0"
