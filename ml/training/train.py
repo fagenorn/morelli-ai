@@ -92,7 +92,7 @@ def collate_fn(examples):
 def train(train_dataset, test_dataset):
     # Set hyperparameters
     training_args = TrainingArguments(
-        output_dir="output_dir", 
+        output_dir=output_dir, 
         evaluation_strategy="steps", 
         do_train=True, 
         do_eval=True, 
