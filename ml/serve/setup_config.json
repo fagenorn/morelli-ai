@@ -1,0 +1,10 @@
+{
+    "model_name": "bert-base-uncased",
+    "mode": "image_classification",
+    "num_labels": "2",
+    "save_mode": "pretrained",
+    "max_length": "150",
+    "embedding_name": "bert",
+    "FasterTransformer": false,
+    "BetterTransformer": false
+}
