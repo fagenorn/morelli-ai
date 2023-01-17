@@ -14,9 +14,6 @@ output = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "dataset
 workers = 16
 
 def download_image(index, url, is_ai=False):
-    print(f"Mock download {index}. {url}")
-    return
-
     response = requests.get(url)
     output_file = os.path.join(output, "ai" if is_ai else "human", f"{index}.jpg")
     open(output_file, "wb").write(response.content)
