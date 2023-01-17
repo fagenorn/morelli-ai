@@ -15,13 +15,13 @@ workers = 16
 
 def download_image(index, url, is_ai=False):
     response = requests.get(url)
-    output_file = os.path.join(output, "ai" if is_ai else "human", f"{index}.jpg")
+    output_file = os.path.join(output, "ai" if is_ai else "human", f"{str(index).zfill(8)}.jpg")
     open(output_file, "wb").write(response.content)
 
     if verify_image(output_file):
-        print(f"Downloaded {index}")
+        print(f"Downloaded {url}")
     else:
-        print(f"Failed to download {index}")
+        print(f"Failed to download {url}")
 
 def verify_image(output_file):
     try:
