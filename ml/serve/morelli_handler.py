@@ -12,7 +12,7 @@ import transformers
 from PIL import Image
 from torchvision.transforms import (CenterCrop, Compose, Normalize, Resize,
                                     ToTensor)
-# from captum.attr import LayerIntegratedGradients
+from captum.attr import IntegratedGradients
 from transformers import AutoFeatureExtractor, AutoModelForImageClassification
 from ts.torch_handler.base_handler import BaseHandler
 
@@ -121,6 +121,8 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
 
         logger.info("Transformer model from path %s loaded successfully", model_dir)
 
+        self.ig = IntegratedGradients(self.model)
+
         self.initialized = True
 
     def preprocess(self, requests):
@@ -171,18 +173,26 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
         Returns:
             (list): Returns a list of the Predictions and Explanations.
         """
-        logits = inference_output.logits
-        attentions = inference_output.attentions
 
-        predicted_label = logits.argmax(-1).item()
-        probs = torch.softmax(logits, dim=1)
+        result = []
 
-        return {
-            "label": self.model.config.id2label[predicted_label],
-            "ai_chance": round(probs[0][0].item(), 4),	
-        }
+        num_rows = inference_output.logits.shape[0]
+        for i in range(num_rows):
+            logits = inference_output.logits[i].unsqueeze(0)
+            attentions = inference_output.attentions[i].unsqueeze(0)
+            predicted_label = logits.argmax(-1).item()
+            label = self.model.config.id2label[predicted_label]
+            probs = torch.softmax(logits, dim=1)
+            prob = round(probs[0][0].item(), 4)
 
-    def get_insights(self, input_batch, text, target):
+            result.append({
+                "label": label,
+                "ai_chance": prob,
+            })
+
+        return result
+
+    def get_insights(self, tensor_data, _, target=0):
         """This function initialize and calls the layer integrated gradient to get word importance
         of the input text if captum explanation has been selected through setup_config
         Args:
@@ -193,7 +203,8 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
             (list): Returns a list of importances and words.
         """
 
-        return []
+        return self.ig.attribute(tensor_data, target=target, n_steps=15).tolist()
+    
         if self.setup_config["captum_explanation"]:
             embedding_layer = getattr(self.model, self.setup_config["embedding_name"])
             embeddings = embedding_layer.embeddings
@@ -256,7 +267,6 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
 
         return [response]
 
-
 def construct_input_ref(text, tokenizer, device, mode):
     """For a given text, this function creates token id, reference id and
     attention mask based on encode which is faster for captum insights
@@ -295,7 +305,6 @@ def construct_input_ref(text, tokenizer, device, mode):
     attention_mask = torch.ones_like(input_ids)
     return input_ids, ref_input_ids, attention_mask
 
-
 def captum_sequence_forward(inputs, attention_mask=None, position=0, model=None):
     """This function is used to get the predictions from the model and this function
     can be used independent of the type of the BERT Task.
@@ -314,7 +323,6 @@ def captum_sequence_forward(inputs, attention_mask=None, position=0, model=None)
     pred = pred[position]
     return pred
 
-
 def summarize_attributions(attributions):
     """Summarises the attribution across multiple runs
     Args:
@@ -325,7 +333,6 @@ def summarize_attributions(attributions):
     attributions = attributions.sum(dim=-1).squeeze(0)
     attributions = attributions / torch.norm(attributions)
     return attributions
-
 
 def get_word_token(input_ids, tokenizer):
     """constructs word tokens from token id using the BERT's
