@@ -8,7 +8,7 @@ import multiprocessing
 
 human_dataset = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "datasets", "laion-art.parquet")
 human_skip = 0
-ai_dataset = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "datasets", "prompts.csv")
+ai_dataset = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "datasets", "openprompts.csv")
 ai_skip = 0
 output = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "datasets", "digital-art")
 workers = 16
