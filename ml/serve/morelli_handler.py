@@ -199,7 +199,7 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
 
         return result
 
-    def get_insights(self, tensor_data, _, target=0):
+    def get_insights(self, batch_feature, _, target=0):
         """This function initialize and calls the layer integrated gradient to get word importance
         of the input text if captum explanation has been selected through setup_config
         Args:
@@ -210,69 +210,8 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
             (list): Returns a list of importances and words.
         """
 
+        tensor_data =batch_feature.convert_to_tensors(tensor_type="pt")
         return self.ig.attribute(tensor_data, target=target, n_steps=15).tolist()
-    
-        if self.setup_config["captum_explanation"]:
-            embedding_layer = getattr(self.model, self.setup_config["embedding_name"])
-            embeddings = embedding_layer.embeddings
-            self.lig = LayerIntegratedGradients(captum_sequence_forward, embeddings)
-        else:
-            logger.warning("Captum Explanation is not chosen and will not be available")
-
-        if isinstance(text, (bytes, bytearray)):
-            text = text.decode("utf-8")
-        text_target = ast.literal_eval(text)
-
-        if not self.setup_config["mode"] == "question_answering":
-            text = text_target["text"]
-        self.target = text_target["target"]
-
-        input_ids, ref_input_ids, attention_mask = construct_input_ref(
-            text, self.tokenizer, self.device, self.setup_config["mode"]
-        )
-        all_tokens = get_word_token(input_ids, self.tokenizer)
-        response = {}
-        response["words"] = all_tokens
-        if (
-            self.setup_config["mode"] == "sequence_classification"
-            or self.setup_config["mode"] == "token_classification"
-        ):
-
-            attributions, delta = self.lig.attribute(
-                inputs=input_ids,
-                baselines=ref_input_ids,
-                target=self.target,
-                additional_forward_args=(attention_mask, 0, self.model),
-                return_convergence_delta=True,
-            )
-
-            attributions_sum = summarize_attributions(attributions)
-            response["importances"] = attributions_sum.tolist()
-            response["delta"] = delta[0].tolist()
-
-        elif self.setup_config["mode"] == "question_answering":
-            attributions_start, delta_start = self.lig.attribute(
-                inputs=input_ids,
-                baselines=ref_input_ids,
-                target=self.target,
-                additional_forward_args=(attention_mask, 0, self.model),
-                return_convergence_delta=True,
-            )
-            attributions_end, delta_end = self.lig.attribute(
-                inputs=input_ids,
-                baselines=ref_input_ids,
-                target=self.target,
-                additional_forward_args=(attention_mask, 1, self.model),
-                return_convergence_delta=True,
-            )
-            attributions_sum_start = summarize_attributions(attributions_start)
-            attributions_sum_end = summarize_attributions(attributions_end)
-            response["importances_answer_start"] = attributions_sum_start.tolist()
-            response["importances_answer_end"] = attributions_sum_end.tolist()
-            response["delta_start"] = delta_start[0].tolist()
-            response["delta_end"] = delta_end[0].tolist()
-
-        return [response]
 
 def construct_input_ref(text, tokenizer, device, mode):
     """For a given text, this function creates token id, reference id and
@@ -311,50 +250,6 @@ def construct_input_ref(text, tokenizer, device, mode):
     # construct attention mask
     attention_mask = torch.ones_like(input_ids)
     return input_ids, ref_input_ids, attention_mask
-
-def captum_sequence_forward(inputs, attention_mask=None, position=0, model=None):
-    """This function is used to get the predictions from the model and this function
-    can be used independent of the type of the BERT Task.
-    Args:
-        inputs (list): Input for Predictions
-        attention_mask (list, optional): The attention mask is a binary tensor indicating the position
-         of the padded indices so that the model does not attend to them, it defaults to None.
-        position (int, optional): Position depends on the BERT Task.
-        model ([type], optional): Name of the model, it defaults to None.
-    Returns:
-        list: Prediction Outcome
-    """
-    model.eval()
-    model.zero_grad()
-    pred = model(inputs, attention_mask=attention_mask)
-    pred = pred[position]
-    return pred
-
-def summarize_attributions(attributions):
-    """Summarises the attribution across multiple runs
-    Args:
-        attributions ([list): attributions from the Layer Integrated Gradients
-    Returns:
-        list : Returns the attributions after normalizing them.
-    """
-    attributions = attributions.sum(dim=-1).squeeze(0)
-    attributions = attributions / torch.norm(attributions)
-    return attributions
-
-def get_word_token(input_ids, tokenizer):
-    """constructs word tokens from token id using the BERT's
-    Auto Tokenizer
-    Args:
-        input_ids (list): Input IDs from construct_input_ref method
-        tokenizer (class): The Auto Tokenizer Pre-Trained model object
-    Returns:
-        (list): Returns the word tokens
-    """
-    indices = input_ids[0].detach().tolist()
-    tokens = tokenizer.convert_ids_to_tokens(indices)
-    # Remove unicode space character from BPE Tokeniser
-    tokens = [token.replace("Ġ", "") for token in tokens]
-    return tokens
 
 def rollout(attentions, discard_ratio, head_fusion):
     result = torch.eye(attentions[0].size(-1))
