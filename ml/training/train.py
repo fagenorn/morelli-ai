@@ -18,7 +18,8 @@ from transformers.trainer_utils import get_last_checkpoint
 
 logger = logging.getLogger(__name__)
 data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "datasets", "digital-art")
-model = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "test_trainer_beit_art_1", "checkpoint-5000")
+model = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "training")
+output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "training_out")
 
 def load_dataset_images():
     train_val_split = 0.20
@@ -91,18 +92,18 @@ def collate_fn(examples):
 def train(train_dataset, test_dataset):
     # Set hyperparameters
     training_args = TrainingArguments(
-        output_dir="test_trainer", 
+        output_dir="output_dir", 
         evaluation_strategy="steps", 
         do_train=True, 
         do_eval=True, 
         overwrite_output_dir=False, 
         log_level="warning",
         num_train_epochs=12, 
-        per_device_train_batch_size=10,
-        per_device_eval_batch_size=10,
+        per_device_train_batch_size=16,
+        per_device_eval_batch_size=16,
         load_best_model_at_end = True,
-        eval_steps=2500,
-        save_steps=2500,
+        eval_steps=5000,
+        save_steps=5000,
         metric_for_best_model = "accuracy",
     )
 

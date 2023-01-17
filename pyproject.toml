@@ -26,6 +26,7 @@ serve-archive = "torch-model-archiver --model-name morelli --version 1.0 --seria
 serve-start = "torchserve --start --model-store ./ml/serve/archive --models morelli=morelli.mar --ncs --ts-config ./ml/serve/config.properties"
 serve-stop = "torchserve --stop"
 download-dataset = "python ./ml/training/dataset_downloader.py"
+train = "python ./ml/training/train.py"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.12.0"
