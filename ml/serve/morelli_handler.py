@@ -120,7 +120,6 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
         
         self.image_processing = val_transforms
 
-        self.model.eval()
         logger.info("Transformer model from path %s loaded successfully", model_dir)
 
         self.initialized = True
