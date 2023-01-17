@@ -147,7 +147,7 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
                 # if the image is a list
                 image = torch.FloatTensor(image)
 
-            images.append(images)
+            images.append(image)
 
         return self.feature_extractor(images=images, return_tensors="pt")
 
