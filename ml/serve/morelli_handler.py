@@ -124,27 +124,33 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
 
         self.initialized = True
 
-    def preprocess(self, data):
+    def preprocess(self, requests):
         """The preprocess function of MNIST program converts the input data to a float tensor
         Args:
             data (List): Input data from the request is in the form of a Tensor
         Returns:
             list : The preprocess function returns the input image as a list of float tensors.
         """
-        image = data.get("data") or data.get("body")
-        if isinstance(image, str):
-            # if the image is a string of bytesarray.
-            image = base64.b64decode(image)
+        images = []
 
-        # If the image is sent as bytesarray
-        if isinstance(image, (bytearray, bytes)):
-            image = Image.open(io.BytesIO(image))
-            image = self.image_processing(image)
-        else:
-            # if the image is a list
-            image = torch.FloatTensor(image)
+        for idx, data in enumerate(requests):
+            image = data.get("data") or data.get("body")
+            if isinstance(image, str):
+                # if the image is a string of bytesarray.
+                image = base64.b64decode(image)
 
-        return image.to(self.device)
+            # If the image is sent as bytesarray
+            if isinstance(image, (bytearray, bytes)):
+                image = Image.open(io.BytesIO(image))
+                image = self.image_processing(image)
+            else:
+                # if the image is a list
+                image = torch.FloatTensor(image)
+
+            inputs = self.feature_extractor(images=image, return_tensors="pt")
+            images.append(inputs)
+
+        return torch.stack(images).to(self.device)
 
     def inference(self, data):
         """Predict the class (or classes) of the received text using the
@@ -156,8 +162,7 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
         """
 
         with torch.no_grad():
-            inputs = self.feature_extractor(images=data, return_tensors="pt")
-            marshalled_data = inputs.to(self.device)
+            marshalled_data = data.to(self.device)
             results = self.model(**marshalled_data)
 
         return results

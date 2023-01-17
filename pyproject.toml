@@ -19,8 +19,8 @@ optimum = "^1.6.1"
 [tool.poe.tasks]
 force-cuda11 = "python -m pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 -f https://download.pytorch.org/whl/torch_stable.html"
 serve-archive = "torch-model-archiver --model-name morelli --version 1.0 --serialized-file ./ml/models/final/pytorch_model.bin --handler ./ml/serve/morelli_handler.py --extra-files './ml/models/final/config.json,./ml/serve/setup_config.json,./ml/models/final/preprocessor_config.json' --export-path ./ml/serve/archive"
-serve = "torchserve --start --model-store ./ml/serve/archive --models morelli=morelli.mar"
-serve-dev = "torchserve --start --model-store ./ml/serve/archive --models morelli=morelli.mar --ncs --foreground"
+serve = "torchserve --start --model-store ./ml/serve/archive --models morelli=morelli.mar --ncs --ts-config ./ml/serve/config.properties"
+serve-dev = "torchserve --start --model-store ./ml/serve/archive --models morelli=morelli.mar --ncs --ts-config ./ml/serve/config.properties --foreground"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.12.0"
