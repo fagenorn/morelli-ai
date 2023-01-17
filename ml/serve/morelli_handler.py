@@ -21,10 +21,6 @@ logger.info("Transformers version %s", transformers.__version__)
 
 
 class TransformersSeqClassifierHandler(BaseHandler, ABC):
-    """
-    Transformers handler class for sequence, token classification and question answering.
-    """
-
     def __init__(self):
         super(TransformersSeqClassifierHandler, self).__init__()
         self.initialized = False
@@ -93,7 +89,7 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
                         "HuggingFace Optimum is not supporting this model,for the list of supported models, please refer to this doc,https://huggingface.co/docs/optimum/bettertransformer/overview"
                     )
 
-                self.model.to(self.device)
+            self.model.to(self.device)
 
         else:
             logger.warning("Missing the checkpoint or state_dict.")
@@ -157,7 +153,7 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
 
             images.append(image)
 
-        return self.feature_extractor(images=images, return_tensors="pt")
+        return self.feature_extractor(images=images, return_tensors="pt").to(self.device)
 
     def inference(self, data):
         """Predict the class (or classes) of the received text using the
@@ -212,44 +208,6 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
 
         tensor_data =batch_feature.convert_to_tensors(tensor_type="pt")
         return self.ig.attribute(tensor_data, target=target, n_steps=15).tolist()
-
-def construct_input_ref(text, tokenizer, device, mode):
-    """For a given text, this function creates token id, reference id and
-    attention mask based on encode which is faster for captum insights
-    Args:
-        text (str): The text specified in the input request
-        tokenizer (AutoTokenizer Class Object): To word tokenize the input text
-        device (cpu or gpu): Type of the Environment the server runs on.
-    Returns:
-        input_id(Tensor): It attributes to the tensor of the input tokenized words
-        ref_input_ids(Tensor): Ref Input IDs are used as baseline for the attributions
-        attention mask() :  The attention mask is a binary tensor indicating the position
-         of the padded indices so that the model does not attend to them.
-    """
-    if mode == "question_answering":
-        question_context = ast.literal_eval(text)
-        question = question_context["question"]
-        context = question_context["context"]
-        text_ids = tokenizer.encode(question, context, add_special_tokens=False)
-
-    text_ids = tokenizer.encode(text, add_special_tokens=False)
-    # construct input token ids
-    logger.info("text_ids %s", text_ids)
-    logger.info("[tokenizer.cls_token_id] %s", [tokenizer.cls_token_id])
-    input_ids = [tokenizer.cls_token_id] + text_ids + [tokenizer.sep_token_id]
-    logger.info("input_ids %s", input_ids)
-
-    input_ids = torch.tensor([input_ids], device=device)
-    # construct reference token ids
-    ref_input_ids = (
-        [tokenizer.cls_token_id]
-        + [tokenizer.pad_token_id] * len(text_ids)
-        + [tokenizer.sep_token_id]
-    )
-    ref_input_ids = torch.tensor([ref_input_ids], device=device)
-    # construct attention mask
-    attention_mask = torch.ones_like(input_ids)
-    return input_ids, ref_input_ids, attention_mask
 
 def rollout(attentions, discard_ratio, head_fusion):
     result = torch.eye(attentions[0].size(-1))
