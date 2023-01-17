@@ -5,13 +5,29 @@ import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
 import json
 import multiprocessing
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--num_images", help="Number of images to download", type=int)
+parser.add_argument("--workers", help="Number of workers to use", type=int)
+args = parser.parse_args()
 
 human_dataset = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "datasets", "laion-art.parquet")
-human_skip = 4846
 ai_dataset = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "datasets", "openprompts.csv")
-ai_skip = 2653
 output = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "datasets", "digital-art")
-workers = 8
+workers = args.workers if args.workers else 6
+num_images = args.num_images if args.num_images else 100
+
+def get_last_file(folder):
+    files = os.listdir(folder)
+    if files:
+        last_file = max(files, key=lambda x: int(x.split(".")[0]))
+        return int(last_file.split(".")[0])
+    else:
+        return 0
+
+human_skip = get_last_file(os.path.join(output, "human"))
+ai_skip = get_last_file(os.path.join(output, "ai"))
 
 def download_image(index, url, is_ai=False):
     response = requests.get(url)
@@ -42,6 +58,8 @@ def download_human_images():
 
     with ThreadPoolExecutor(max_workers=workers) as executor:
         for index, row in df.iterrows():
+            if index >= human_skip + num_images:
+                break
             if human_skip > index:
                 continue
 
@@ -58,12 +76,14 @@ def download_ai_images():
         with ThreadPoolExecutor(max_workers=workers) as executor:
             for index, row in chunk.iterrows():
                 index = batch_size * i + index
+                if index >= ai_skip + num_images:
+                    break
                 if ai_skip > index:
                     continue
 
                 executor.submit(download_image, index, row["image_uri"], True)
 
-if __name__ == "__main__":
+if __name__ == "__main__":    
     p1 = multiprocessing.Process(target=download_human_images, name="download_human_images")
     p2 = multiprocessing.Process(target=download_ai_images, name="download_ai_images")
 
