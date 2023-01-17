@@ -124,31 +124,27 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
 
         self.initialized = True
 
-    def preprocess(self, requests):
+    def preprocess(self, data):
         """The preprocess function of MNIST program converts the input data to a float tensor
         Args:
             data (List): Input data from the request is in the form of a Tensor
         Returns:
             list : The preprocess function returns the input image as a list of float tensors.
         """
-        images = []
-        for idx, data in enumerate(requests):
-            image = data.get("data") or data.get("body")
-            if isinstance(image, str):
-                # if the image is a string of bytesarray.
-                image = base64.b64decode(image)
+        image = data.get("data") or data.get("body")
+        if isinstance(image, str):
+            # if the image is a string of bytesarray.
+            image = base64.b64decode(image)
 
-            # If the image is sent as bytesarray
-            if isinstance(image, (bytearray, bytes)):
-                image = Image.open(io.BytesIO(image))
-                image = self.image_processing(image)
-            else:
-                # if the image is a list
-                image = torch.FloatTensor(image)
+        # If the image is sent as bytesarray
+        if isinstance(image, (bytearray, bytes)):
+            image = Image.open(io.BytesIO(image))
+            image = self.image_processing(image)
+        else:
+            # if the image is a list
+            image = torch.FloatTensor(image)
 
-            images.append(image)
-
-        return torch.stack(images).to(self.device)
+        return image.to(self.device)
 
     def inference(self, data):
         """Predict the class (or classes) of the received text using the

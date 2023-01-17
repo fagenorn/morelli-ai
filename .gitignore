@@ -285,3 +285,5 @@ ml/datasets/*
 !ml/datasets/.gitkeep
 ml/models/*
 !ml/models/.gitkeep
+ml/serve/archive/*
+!ml/serve/archive/.gitkeep
