@@ -13,7 +13,7 @@ from PIL import Image
 from torchvision.transforms import (CenterCrop, Compose, Normalize, Resize,
                                     ToTensor)
 from captum.attr import IntegratedGradients
-from transformers import AutoFeatureExtractor, AutoModelForImageClassification
+from transformers import AutoFeatureExtractor, AutoModelForImageClassification, AutoConfig
 from ts.torch_handler.base_handler import BaseHandler
 
 logger = logging.getLogger(__name__)
@@ -68,7 +68,14 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
             self.model = torch.jit.load(model_pt_path, map_location=self.device)
         elif self.setup_config["save_mode"] == "pretrained":
             if self.setup_config["mode"] == "image_classification":
-                self.model = AutoModelForImageClassification.from_pretrained(model_dir)
+                config = AutoConfig.from_pretrained(
+                        model_dir,
+                        output_attentions=True,
+                )
+                self.model = AutoModelForImageClassification.from_pretrained(
+                        model_dir,
+                        config=config,
+                )
             else:
                 logger.warning("Missing the operation mode.")
             # Using the Better Transformer integration to speedup the inference
