@@ -18,7 +18,7 @@ from transformers.trainer_utils import get_last_checkpoint
 
 logger = logging.getLogger(__name__)
 data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "datasets", "digital-art")
-model = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "training")
+model_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "training")
 output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "training_out")
 
 def load_dataset_images():
@@ -140,7 +140,7 @@ def train(train_dataset, test_dataset):
         return metric.compute(predictions=np.argmax(p.predictions, axis=1), references=p.label_ids)
     
     config = AutoConfig.from_pretrained(
-       model,
+       model_dir,
         num_labels=len(labels),
         label2id=label2id,
         id2label=id2label,
@@ -148,12 +148,12 @@ def train(train_dataset, test_dataset):
         problem_type="single_label_classification",
     )
     model = AutoModelForImageClassification.from_pretrained(
-       model,
+       model_dir,
         config=config,
         ignore_mismatched_sizes=True,
     )
     feature_extractor = AutoFeatureExtractor.from_pretrained(
-        os.path.join(model, "preprocessor_config.json"),
+        os.path.join(model_dir, "preprocessor_config.json"),
         ignore_mismatched_sizes=True,
     )
     
