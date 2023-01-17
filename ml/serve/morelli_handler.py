@@ -68,7 +68,7 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
         if self.setup_config["save_mode"] == "torchscript":
             self.model = torch.jit.load(model_pt_path, map_location=self.device)
         elif self.setup_config["save_mode"] == "pretrained":
-            if self.setup_config["mode"] == "text_generation":
+            if self.setup_config["mode"] == "image_classification":
                 self.model = AutoModelForImageClassification.from_pretrained(model_dir)
             else:
                 logger.warning("Missing the operation mode.")
