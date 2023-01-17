@@ -280,3 +280,8 @@ poetry.toml
 # End of https://www.toptal.com/developers/gitignore/api/django,python,visualstudiocode
 
 !poetry.toml
+
+ml/datasets/*
+!ml/datasets/.gitkeep
+ml/models/*
+!ml/models/.gitkeep
