@@ -95,7 +95,7 @@ class TransformersSeqClassifierHandler(BaseHandler, ABC):
 
 
         self.feature_extractor = AutoFeatureExtractor.from_pretrained(
-            self.setup_config["model_name"],
+           model_dir,
         )
 
         if "shortest_edge" in self.feature_extractor.size:
