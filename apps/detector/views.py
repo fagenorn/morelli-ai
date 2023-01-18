@@ -14,7 +14,7 @@ def image_upload(request):
         if image.size >= MAX_FILE_SIZE:
             return JsonResponse({'label': 'FILE TOO LARGE', 'ai_chance': 1})
 
-        api_response = requests.post(f'http://54.211.83.197/predictions/morelli/{MODEL_VERSION}', data=image)
+        api_response = requests.post(f'http://localhost:8080/predictions/morelli/{MODEL_VERSION}', data=image)
         api_response_data = api_response.json()
 
         if api_response.status_code == 200:
