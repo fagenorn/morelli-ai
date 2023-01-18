@@ -1,4 +1,5 @@
 loading = false;
+MAX_FILE_SIZE = 6553500
 
 function handleDrop(event) {
     event.preventDefault();
@@ -12,11 +13,18 @@ function handleDrop(event) {
 }
 
 function loadFile(file) {
+    if (file.size > MAX_FILE_SIZE) {
+        alert("File size is too big. Please upload a file less than 6.5MB.");
+        loading = false;
+        return;
+    }
+
     document.querySelector('.loading').classList.add('is-visible');
     document.querySelector('#output').classList.add('is-loading');
 
     var output = document.getElementById('output');
     output.src = URL.createObjectURL(file);
+
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "/", true);
     xhr.onreadystatechange = function() {
