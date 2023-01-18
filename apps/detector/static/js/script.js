@@ -1,5 +1,6 @@
 loading = false;
 MAX_FILE_SIZE = 6553500
+model_version = "1.0"
 
 function handleDrop(event) {
     event.preventDefault();
@@ -65,5 +66,10 @@ function loadFile(file) {
 
     var formData = new FormData();
     formData.append("file", file);
+    formData.append("version", model_version);
     xhr.send(formData);
 }
+
+document.getElementById('version-select').addEventListener('change', function() {
+    model_version = this.value;
+});

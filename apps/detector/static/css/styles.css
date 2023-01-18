@@ -128,3 +128,56 @@ form {
 #verdict {
     width: 400px;
 }
+
+/* Add styling for the select element */
+select#version-select {
+    width: 75px;
+    /* set width of the select element */
+    padding: 10px;
+    /* add padding to the select element */
+    border-radius: 5px;
+    /* add border radius to the select element */
+    margin: 10px 0;
+    /* add margin to the select element */
+    font-size: 16px;
+    /* add font size to the select element */
+    background-color: #f5f5f5;
+    /* add background color to the select element */
+    color: #555;
+    /* add text color to the select element */
+    text-align: center;
+
+}
+
+/* Add styling for the select element options */
+select#version-select option {
+    background-color: #fff;
+    /* add background color to the options */
+    color: #555;
+    /* add text color to the options */
+}
+
+/* Add styling for the select element on focus */
+select#version-select:focus {
+    outline: none;
+    /* remove the focus outline */
+    box-shadow: 0 0 0 2px #4CAF50;
+    /* add a box shadow on focus */
+}
+
+/* Add styling for the select label */
+label[for='version-select'] {
+    font-size: 18px;
+    /* add font size to the label */
+    margin-right: 10px;
+    /* add margin to the label */
+    font-weight: bold;
+    /* add font weight to the label */
+    text-transform: uppercase;
+    /* change the text to uppercase */
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+}
