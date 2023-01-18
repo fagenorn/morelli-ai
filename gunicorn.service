@@ -6,7 +6,7 @@ After=network.target
 [Service]
 User=ubuntu
 Group=www-data
-WorkingDirectory=~/nginx-tutorial
+WorkingDirectory=/home/ubuntu/morelli-ai
 ExecStart=/home/ubuntu/morelli-ai/.venv/bin/gunicorn \
           --access-logfile - \
           --workers 3 \
