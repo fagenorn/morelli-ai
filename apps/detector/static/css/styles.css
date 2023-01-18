@@ -1,0 +1,130 @@
+/* Add styling for the form and file input */
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Add styling for the drag and drop window */
+#dropArea {
+    width: 500px;
+    /* set width of the drag and drop window */
+    height: 500px;
+    /* set height of the drag and drop window */
+    padding: 50px;
+    /* add padding to the drag and drop window */
+    border: 2px dashed #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background-color 0.2s ease;
+    background-color: #f5f5f5;
+    /* add background color to the drag and drop window */
+    color: #555;
+    /* add text color */
+    font-size: 36px;
+    /* add font size */
+    font-weight: bold;
+    /* add font weight */
+}
+
+#dropArea:hover {
+    background-color: #f5f5f5;
+}
+
+/* Add styling for the response message */
+.response {
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 5px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.response.success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.response.error {
+    background-color: #f44336;
+    color: white;
+}
+
+/* Add styling for the image preview */
+.preview-container {
+    position: relative;
+    height: 390px;
+    top: 10%;
+}
+
+#output {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.loading {
+    position: absolute;
+    /* set position to absolute */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.preview-container .loading {
+    display: none;
+}
+
+.preview-container .loading.is-visible {
+    display: block;
+}
+
+.preview-container #output {
+    background-color: transparent;
+}
+
+#loading-bar {
+    width: 100%;
+    height: 30px;
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 10px auto;
+    background-color: #ddd;
+    position: relative;
+}
+
+
+#progress {
+    height: 100%;
+    background-color: #4CAF50;
+    transition: width 0.5s ease;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#progress:before {
+    content: "";
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.05));
+    transition: 0.4s linear;
+    transition-property: width, background-color;
+    box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.25), inset 0 1px rgba(255, 255, 255, 0.1);
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#percentage {
+    font-size: 24px;
+}
+
+#verdict {
+    width: 400px;
+}

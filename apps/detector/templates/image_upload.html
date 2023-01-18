@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <form action='{% url 'image_upload' %}' method='post' enctype='multipart/form-data' id="uploadForm">
+        {% csrf_token %}
+        <div id="dropArea" ondragover="event.preventDefault()" ondragend="return false" ondrop="handleDrop(event)">
+            Drag and drop an image here
+            <div class="preview-container">
+                <img id="output">
+                <div class="loading">
+                    <img src="{% static 'images/spinner.gif' %}" alt="Loading...">
+                </div>
+            </div>
+        </div>
+        <div id="verdict">
+            <div class="response" id="response">{{ message }}</div>
+            <div id="loading-bar">
+                <div id="progress"></div>
+            </div>
+            <span id="percentage"></span>
+        </div>
+    </form>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+    <script src="{% static 'js/script.js' %}"></script>
+{% endblock %}
