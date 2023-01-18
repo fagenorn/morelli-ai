@@ -25,12 +25,14 @@ gunicorn = "^20.1.0"
 
 [tool.poe.tasks]
 force-cuda11 = "python -m pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 -f https://download.pytorch.org/whl/torch_stable.html"
-serve-archive = "torch-model-archiver --model-name morelli --serialized-file ./ml/models/final/pytorch_model.bin --handler ./ml/serve/morelli_handler.py --extra-files './ml/models/final/config.json,./ml/serve/setup_config.json,./ml/models/final/preprocessor_config.json' --export-path ./ml/serve/archive"
-serve-start = "torchserve --start --model-store ./ml/serve/archive --models morelli=morelli.mar --ncs --ts-config ./ml/serve/config.properties"
+serve-archive = "torch-model-archiver --serialized-file ./ml/models/final/pytorch_model.bin --handler ./ml/serve/morelli_handler.py --extra-files './ml/models/final/config.json,./ml/serve/setup_config.json,./ml/models/final/preprocessor_config.json' --export-path ./ml/serve/archive"
+serve-start = "torchserve --start --model-store ./ml/serve/archive --ncs --ts-config ./ml/serve/config.properties"
 serve-stop = "torchserve --stop"
 download-dataset = "python ./ml/training/dataset_downloader.py"
 train = "python ./ml/training/train.py"
-django-start = "python -m gunicorn morelli.asgi:application -k uvicorn.workers.UvicornWorker"
+django-start = "sudo systemctl start gunicorn.service"
+django-stop = "sudo systemctl stop gunicorn.service"
+django-restart = "sudo systemctl restart gunicorn.service"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.12.0"
