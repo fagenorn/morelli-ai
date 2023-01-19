@@ -169,7 +169,7 @@ def train(train_dataset, test_dataset):
     test_dataset.set_transform(val_transforms)
 
         # Initalize our trainer
-    trainer = Trainer(
+    trainer = CustomTrainer(
         model=model,
         args=training_args,
         train_dataset=train_dataset,
@@ -177,7 +177,7 @@ def train(train_dataset, test_dataset):
         compute_metrics=compute_metrics,
         tokenizer=feature_extractor,
         data_collator=collate_fn,
-        callbacks = [EarlyStoppingCallback(early_stopping_patience=3)],
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
     )
 
     checkpoint = None
@@ -196,7 +196,18 @@ def train(train_dataset, test_dataset):
     trainer.log_metrics("eval", metrics)
     trainer.save_metrics("eval", metrics)
 
-        
+
+class CustomTrainer(Trainer):
+    def compute_loss(self, model, inputs, return_outputs=False):
+        labels = inputs.get("labels")
+        # forward pass
+        outputs = model(**inputs)
+        logits = outputs.get("logits")
+        # compute custom loss (suppose one has 3 labels with different weights)
+        loss_fct = torch.nn.CrossEntropyLoss(weight=torch.tensor([1.0, 2.0]))
+        loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
+        return (loss, outputs) if return_outputs else loss
+    
 if __name__ == "__main__":
     ImageFile.LOAD_TRUNCATED_IMAGES = True
     d_train, d_test = load_dataset_images()
