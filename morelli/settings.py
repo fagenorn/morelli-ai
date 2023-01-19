@@ -130,5 +130,6 @@ STATIC_ROOT = "/var/www/morelli.ai/static/"
 
 
 CORS_ALLOWED_ORIGINS = [
-    "http://morelli.ai",
+    "https://morelli.ai",
+    "https://www.morelli.ai",
 ]
