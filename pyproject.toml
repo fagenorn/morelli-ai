@@ -22,6 +22,7 @@ captum = "^0.6.0"
 scikit-learn = "^1.2.0"
 uvicorn = "^0.20.0"
 gunicorn = "^20.1.0"
+django-cors-headers = "^3.13.0"
 
 [tool.poe.tasks]
 force-cuda11 = "python -m pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 -f https://download.pytorch.org/whl/torch_stable.html"
