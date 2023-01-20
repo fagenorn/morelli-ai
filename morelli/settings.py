@@ -133,6 +133,6 @@ STATIC_ROOT = "/var/www/morelli.ai/static/"
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = False
-CORS_ALLOWED_ORIGIN_REGEXES = [r"^https://(\w+\.|)morelli\.ai$"]
+CORS_ALLOWED_ORIGIN_REGEXES = [r"^https:\/\/(\w+\.|)morelli\.ai$"]
 CORS_ALLOW_METHODS = list(default_methods) + []
 CORS_ALLOW_HEADERS = list(default_headers) + []
