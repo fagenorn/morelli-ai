@@ -10,6 +10,8 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--num_images", help="Number of images to download", type=int)
 parser.add_argument("--workers", help="Number of workers to use", type=int)
+parser.add_argument("--human_only", help="Download only human images", action="store_true")
+parser.add_argument("--ai_only", help="Download only AI images", action="store_true")
 args = parser.parse_args()
 
 human_dataset = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "datasets", "laion-art.parquet")
@@ -83,12 +85,15 @@ def download_ai_images():
 
                 executor.submit(download_image, index, row["image_uri"], True)
 
-if __name__ == "__main__":    
-    p1 = multiprocessing.Process(target=download_human_images, name="download_human_images")
-    p2 = multiprocessing.Process(target=download_ai_images, name="download_ai_images")
-
-    p1.start()
-    p2.start()
-
-    p1.join()
-    p2.join()
+if __name__ == "__main__": 
+    if args.human_only:
+        download_human_images()
+    elif args.ai_only:
+        download_ai_images()
+    else:
+        p1 = multiprocessing.Process(target=download_human_images, name="download_human_images")
+        p2 = multiprocessing.Process(target=download_ai_images, name="download_ai_images")
+        p1.start()
+        p2.start()     
+        p1.join()
+        p2.join()
