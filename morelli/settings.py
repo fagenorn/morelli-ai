@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 
+from corsheaders.defaults import default_headers, default_methods
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -129,8 +131,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 STATIC_ROOT = "/var/www/morelli.ai/static/"
 
 
-CORS_ALLOWED_ORIGINS = [
-    "https://morelli.ai",
-    "https://www.morelli.ai",
-    "https://dev.morelli.ai",
-]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ALLOWED_ORIGIN_REGEXES = [r"^https://(\w+\.|)morelli\.ai$"]
+CORS_ALLOW_METHODS = list(default_methods) + []
+CORS_ALLOW_HEADERS = list(default_headers) + []
